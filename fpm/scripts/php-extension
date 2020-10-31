@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# Install php extension
+apt install "php${PHP_VERSION}-$1"

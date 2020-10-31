@@ -1,0 +1,15 @@
+#!/bin/bash
+
+apt update
+apt install curl -y
+curl -sSL https://packages.sury.org/php/README.txt | bash -x
+apt update
+
+# Install php and fpm
+apt install -y php$PHP_VERSION php${PHP_VERSION}-fpm
+
+# Create directory for PID file
+mkdir -p /run/php/
+
+# Change listen directive to use localhost:9000
+sed -i 's/\/run.*sock/127.0.0.1:9000/' /etc/php/$PHP_VERSION/fpm/pool.d/www.conf
