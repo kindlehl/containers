@@ -74,10 +74,3 @@ spec:
             backend:
               serviceName: "app1-service"
               servicePort: 8888
-    - host:  internal-k8s-default-app1ingr-25e523ab8e-420922742.us-west-2.elb.amazonaws.com
-      http:
-        paths:
-          - path: /*
-            backend:
-              serviceName: "app1-service"
-              servicePort: 8888
