@@ -21,6 +21,8 @@ RUN { \
     echo 'opcache.enable_cli=1'; \
   } > /etc/php/$PHP_VERSION/fpm/conf.d/10-opcache.ini
 
+EXPOSE 9000/TCP
+
 CMD /usr/sbin/php-fpm${PHP_VERSION} --daemonize \
     --fpm-config /etc/php/$PHP_VERSION/fpm/php-fpm.conf \
     && tail -f /var/log/php${PHP_VERSION}-fpm.log

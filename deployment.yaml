@@ -1,0 +1,83 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-lamp
+  labels:
+    app: app1
+spec:
+  replicas: 3
+  selector: 
+    matchLabels:
+      app: app1 
+  template:
+    metadata:
+      labels:
+        app: app1
+    spec:
+      volumes:
+        - name: app-code
+          emptyDir: {}
+      containers:
+        - name: fpm
+          image: quay.io/kindlehl/fpm:7.4
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9000
+          volumeMounts:
+            - mountPath: /app
+              name: app-code
+        - name: app
+          image: quay.io/kindlehl/app:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - mountPath: /shared-files
+              name: app-code
+          lifecycle:
+            postStart:
+              exec:
+                # Copy application code to shared volume so fpm has access too
+                command: ["/bin/sh", "-c", "cp -r /app/* /shared-files"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app1-service
+  labels:
+    app: app1-service
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 8888
+      targetPort: 80
+  selector:
+    app: app1
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata: 
+  name: app1-ingress
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+  labels:
+    app: app1-ingress
+spec:
+  rules:
+    - host: app1.kindlehl.tag1.io
+      http:
+        paths:
+          - path: /*
+            backend:
+              serviceName: "app1-service"
+              servicePort: 8888
+    - host:  internal-k8s-default-app1ingr-25e523ab8e-420922742.us-west-2.elb.amazonaws.com
+      http:
+        paths:
+          - path: /*
+            backend:
+              serviceName: "app1-service"
+              servicePort: 8888
